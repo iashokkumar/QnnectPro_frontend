@@ -6,6 +6,7 @@ import ConnectSection from './components/ConnectSection';
 import Footer from './components/Footer';
 import Login from './components/Login';
 import Signup from './components/Signup';
+import RoleSelection from './components/RoleSelection';
 import Dashboard from './components/Dashboard';
 import ExpertDashboard from './components/ExpertDashboard';
 import { GoogleOAuthProvider } from '@react-oauth/google';
@@ -41,7 +42,7 @@ function App() {
                   <button onClick={() => { setConnectModal(true); setNavOpen(false); }} className="block md:inline hover:text-blue-600 bg-transparent border-none p-0 m-0 focus:outline-none cursor-pointer">Contact us</button>
                   <div className="md:hidden border-t pt-4 mt-4">
                     <Link to="/login" className="block px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900">Login</Link>
-                    <Link to="/signup" className="block px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 mt-2">Sign Up</Link>
+                    <Link to="/role-selection" className="block px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 mt-2">Sign Up</Link>
                   </div>
                 </div>
                 {/* Auth Buttons */}
@@ -49,7 +50,7 @@ function App() {
                   <Link to="/login" className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900">
                     Login
                   </Link>
-                  <Link to="/signup" className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700">
+                  <Link to="/role-selection" className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700">
                     Sign Up
                   </Link>
                 </div>
@@ -101,6 +102,7 @@ function App() {
             </>
           } />
           <Route path="/login" element={<Login />} />
+          <Route path="/role-selection" element={<RoleSelection />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/expert-dashboard" element={<ExpertDashboard />} />

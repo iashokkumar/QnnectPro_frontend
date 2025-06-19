@@ -1,115 +1,191 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import { GoogleLogin } from '@react-oauth/google';
 import jwt_decode from 'jwt-decode';
 
 const Signup: React.FC = () => {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [role, setRole] = useState('client'); // Default role to client
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [role, setRole] = useState<'user' | 'expert'>('user');
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+    // Additional fields for experts
+    expertise: '',
+    experience: '',
+    hourlyRate: '',
+  });
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const roleParam = params.get('role');
+    if (roleParam === 'user' || roleParam === 'expert') {
+      setRole(roleParam);
+    } else {
+      navigate('/role-selection');
+    }
+  }, [location, navigate]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setSuccess(null);
 
+    // Basic validation
+    if (formData.password !== formData.confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
+
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/register', {
-        name,
-        email,
-        password,
-        role, // Include role in the request body
+      const response = await axios.post('http://localhost:5000/api/auth/signup', {
+        ...formData,
+        role,
       });
 
-      // Handle successful signup
-      setSuccess('Signup successful! Please login.');
-      console.log('Signup successful!', response.data);
-      // You might want to redirect the user to the login page here
-      // navigate('/login'); // Example using react-router-dom
+      const { user, token } = response.data;
+      if (user && token) {
+        localStorage.setItem('userName', user.name);
+        localStorage.setItem('userEmail', user.email);
+        localStorage.setItem('userRole', user.role);
+        localStorage.setItem('token', token);
 
-    } catch (err: any) {
-      // Handle backend errors or network errors
-      if (err.response) {
-        // The request was made and the server responded with a status code
-        // that falls out of the range of 2xx
-        setError(err.response.data.message || 'Signup failed');
-        console.error('Signup failed:', err.response.data);
-      } else if (err.request) {
-        // The request was made but no response was received
-        setError('No response from server. Please ensure the backend is running and accessible.');
-        console.error('No response from server:', err.request);
-      } else {
-        // Something happened in setting up the request that triggered an Error
-        setError('An error occurred. Please try again.');
-        console.error('Error during signup:', err.message);
+        if (user.role === 'expert') {
+          navigate('/expert-dashboard');
+        } else {
+          navigate('/dashboard');
+        }
       }
+    } catch (err: any) {
+      if (err.response) {
+        setError(err.response.data.message || 'Signup failed');
+      } else if (err.request) {
+        setError('No response from server. Please try again.');
+      } else {
+        setError('An error occurred. Please try again.');
+      }
+      console.error('Signup error:', err);
     }
   };
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100">
       <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md">
-        <h2 className="text-2xl font-bold text-center text-gray-800">Sign Up</h2>
+        <h2 className="text-2xl font-bold text-center text-gray-800">
+          Sign up as {role === 'expert' ? 'an Expert' : 'a User'}
+        </h2>
         {error && <p className="text-red-500 text-center text-sm">{error}</p>}
         {success && <p className="text-green-500 text-center text-sm">{success}</p>}
+        
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700">Name</label>
+            <label htmlFor="name" className="block text-sm font-medium text-gray-700">Full Name</label>
             <input
               id="name"
               name="name"
               type="text"
-              autoComplete="name"
               required
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              value={formData.name}
+              onChange={handleChange}
             />
           </div>
+
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email address</label>
             <input
               id="email"
               name="email"
               type="email"
-              autoComplete="email"
               required
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              value={formData.email}
+              onChange={handleChange}
             />
           </div>
+
           <div>
             <label htmlFor="password" className="block text-sm font-medium text-gray-700">Password</label>
             <input
               id="password"
               name="password"
               type="password"
-              autoComplete="new-password"
               required
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              value={formData.password}
+              onChange={handleChange}
             />
           </div>
-          {/* Role Selection */}
+
           <div>
-            <label htmlFor="role" className="block text-sm font-medium text-gray-700">Role</label>
-            <select
-              id="role"
-              name="role"
+            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">Confirm Password</label>
+            <input
+              id="confirmPassword"
+              name="confirmPassword"
+              type="password"
               required
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900"
-              value={role}
-              onChange={(e) => setRole(e.target.value)}
-            >
-              <option value="client">Client</option>
-              <option value="expert">Expert</option>
-            </select>
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+            />
           </div>
+
+          {role === 'expert' && (
+            <>
+              <div>
+                <label htmlFor="expertise" className="block text-sm font-medium text-gray-700">Area of Expertise</label>
+                <input
+                  id="expertise"
+                  name="expertise"
+                  type="text"
+                  required
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  value={formData.expertise}
+                  onChange={handleChange}
+                />
+              </div>
+
+              <div>
+                <label htmlFor="experience" className="block text-sm font-medium text-gray-700">Years of Experience</label>
+                <input
+                  id="experience"
+                  name="experience"
+                  type="number"
+                  required
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  value={formData.experience}
+                  onChange={handleChange}
+                />
+              </div>
+
+              <div>
+                <label htmlFor="hourlyRate" className="block text-sm font-medium text-gray-700">Hourly Rate ($)</label>
+                <input
+                  id="hourlyRate"
+                  name="hourlyRate"
+                  type="number"
+                  required
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  value={formData.hourlyRate}
+                  onChange={handleChange}
+                />
+              </div>
+            </>
+          )}
+
           <div>
             <button
               type="submit"
@@ -119,6 +195,11 @@ const Signup: React.FC = () => {
             </button>
           </div>
         </form>
+
+        <div className="text-center text-sm text-gray-600">
+          Already have an account? <a href="/login" className="font-medium text-blue-600 hover:text-blue-500">Sign in</a>
+        </div>
+
         <div className="flex justify-center my-4">
           <GoogleLogin
             onSuccess={async (credentialResponse) => {
@@ -144,9 +225,6 @@ const Signup: React.FC = () => {
             }}
             onError={() => setError('Google signup failed.')}
           />
-        </div>
-        <div className="text-center text-sm text-gray-600">
-          Already have an account? <a href="#" className="font-medium text-blue-600 hover:text-blue-500">Sign in</a>
         </div>
       </div>
     </div>

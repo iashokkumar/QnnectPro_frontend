@@ -100,7 +100,7 @@ const Login: React.FC = () => {
           </div>
         </form>
         <div className="text-center text-sm text-gray-600">
-          Don't have an account? <a href="#" className="font-medium text-blue-600 hover:text-blue-500">Sign up</a>
+          Don't have an account? <a href="/role-selection" className="font-medium text-blue-600 hover:text-blue-500">Sign up</a>
         </div>
         <div className="flex justify-center my-4">
           <GoogleLogin
