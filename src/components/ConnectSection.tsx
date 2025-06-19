@@ -1,7 +1,10 @@
 import React from 'react';
 import { FiPhone } from 'react-icons/fi';
+import { useNavigate } from 'react-router-dom';
 
 const ConnectSection: React.FC = () => {
+  const navigate = useNavigate();
+
   return (
     <section className="bg-[#E9D3A4] py-12 flex flex-col items-center">
       <div className="max-w-3xl w-full px-4">
@@ -31,7 +34,7 @@ const ConnectSection: React.FC = () => {
             <h3 className="text-lg font-semibold mb-2 text-black text-center">
               To monetise your expertise and knowledge,<br />Join us as an Expert.
             </h3>
-            <button className="mt-4 px-6 py-2 bg-orange-500 text-white font-bold rounded-md text-lg hover:bg-orange-600 transition">
+            <button className="mt-4 px-6 py-2 bg-orange-500 text-white font-bold rounded-md text-lg hover:bg-orange-600 transition" onClick={() => navigate('/signup?role=expert')}>
               Join Now!
             </button>
           </div>

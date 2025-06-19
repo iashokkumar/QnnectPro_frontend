@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import { GoogleLogin } from '@react-oauth/google';
 
 const Signup: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const isExpertSignup = new URLSearchParams(location.search).get('role') === 'expert';
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -41,7 +43,11 @@ const Signup: React.FC = () => {
         localStorage.setItem('userEmail', user.email);
         localStorage.setItem('userRole', user.role);
         localStorage.setItem('token', token);
-        navigate('/dashboard');
+        if (isExpertSignup) {
+          navigate('/expert-dashboard');
+        } else {
+          navigate('/dashboard');
+        }
       }
     } catch (err: any) {
       if (err.response) {
@@ -133,7 +139,11 @@ const Signup: React.FC = () => {
                     localStorage.setItem('userEmail', user.email || '');
                     localStorage.setItem('userRole', user.role || 'user');
                     localStorage.setItem('token', token);
-                    navigate('/dashboard');
+                    if (isExpertSignup) {
+                      navigate('/expert-dashboard');
+                    } else {
+                      navigate('/dashboard');
+                    }
                   }
                 } catch (err) {
                   setError('Google signup failed.');

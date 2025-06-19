@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { GoogleLogin } from '@react-oauth/google';
 import jwt_decode from 'jwt-decode';
 
@@ -9,6 +9,8 @@ const Login: React.FC = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
+  const location = useLocation();
+  const isExpertLogin = new URLSearchParams(location.search).get('role') === 'expert';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,7 +30,9 @@ const Login: React.FC = () => {
         localStorage.setItem('userRole', user.role || '');
         localStorage.setItem('token', token);
       }
-      if (user && user.role === 'expert') {
+      if (isExpertLogin) {
+        navigate('/expert-dashboard');
+      } else if (user && user.role === 'expert') {
         navigate('/expert-dashboard');
       } else {
         navigate('/dashboard');
@@ -116,7 +120,9 @@ const Login: React.FC = () => {
                     localStorage.setItem('userEmail', user.email || '');
                     localStorage.setItem('userRole', user.role || '');
                     localStorage.setItem('token', token);
-                    if (user.role === 'expert') {
+                    if (isExpertLogin) {
+                      navigate('/expert-dashboard');
+                    } else if (user.role === 'expert') {
                       navigate('/expert-dashboard');
                     } else {
                       navigate('/dashboard');
