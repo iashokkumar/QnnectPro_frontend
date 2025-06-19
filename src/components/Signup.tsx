@@ -2,8 +2,10 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { GoogleLogin } from '@react-oauth/google';
 import jwt_decode from 'jwt-decode';
+import { useNavigate } from 'react-router-dom';
 
 const Signup: React.FC = () => {
+  const navigate = useNavigate();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -26,6 +28,8 @@ const Signup: React.FC = () => {
 
       // Handle successful signup
       setSuccess('Signup successful! Please login.');
+      navigate('/login');
+
       console.log('Signup successful!', response.data);
       // You might want to redirect the user to the login page here
       // navigate('/login'); // Example using react-router-dom
