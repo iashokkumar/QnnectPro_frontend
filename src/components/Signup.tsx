@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import { GoogleLogin } from '@react-oauth/google';
+<<<<<<< HEAD
 
 const Signup: React.FC = () => {
   const navigate = useNavigate();
@@ -13,6 +14,17 @@ const Signup: React.FC = () => {
     password: '',
     confirmPassword: '',
   });
+=======
+import jwt_decode from 'jwt-decode';
+import { useNavigate } from 'react-router-dom';
+
+const Signup: React.FC = () => {
+  const navigate = useNavigate();
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [role, setRole] = useState('client'); // Default role to client
+>>>>>>> b54d7ec (Navigation added)
   const [error, setError] = useState<string | null>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -37,6 +49,7 @@ const Signup: React.FC = () => {
         ...formData,
         role: 'user',
       });
+<<<<<<< HEAD
       const { user, token } = response.data;
       if (user && token) {
         localStorage.setItem('userName', user.name);
@@ -48,6 +61,32 @@ const Signup: React.FC = () => {
         } else {
           navigate('/dashboard');
         }
+=======
+
+      // Handle successful signup
+      setSuccess('Signup successful! Please login.');
+      navigate('/login');
+
+      console.log('Signup successful!', response.data);
+      // You might want to redirect the user to the login page here
+      // navigate('/login'); // Example using react-router-dom
+
+    } catch (err: any) {
+      // Handle backend errors or network errors
+      if (err.response) {
+        // The request was made and the server responded with a status code
+        // that falls out of the range of 2xx
+        setError(err.response.data.message || 'Signup failed');
+        console.error('Signup failed:', err.response.data);
+      } else if (err.request) {
+        // The request was made but no response was received
+        setError('No response from server. Please ensure the backend is running and accessible.');
+        console.error('No response from server:', err.request);
+      } else {
+        // Something happened in setting up the request that triggered an Error
+        setError('An error occurred. Please try again.');
+        console.error('Error during signup:', err.message);
+>>>>>>> b54d7ec (Navigation added)
       }
     } catch (err: any) {
       if (err.response) {

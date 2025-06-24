@@ -48,7 +48,7 @@ const Dashboard: React.FC = () => {
 
   const handleHome = () => {
     setShowProfile(false);
-    navigate('/');
+    navigate('/dashboard');
   };
 
   const handleProfile = () => {
