@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { GoogleLogin } from '@react-oauth/google';
 import jwt_decode from 'jwt-decode';
 
@@ -9,6 +9,8 @@ const Login: React.FC = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
+  const location = useLocation();
+  const isExpertLogin = new URLSearchParams(location.search).get('role') === 'expert';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,7 +30,9 @@ const Login: React.FC = () => {
         localStorage.setItem('userRole', user.role || '');
         localStorage.setItem('token', token);
       }
-      if (user && user.role === 'expert') {
+      if (isExpertLogin) {
+        navigate('/expert-dashboard');
+      } else if (user && user.role === 'expert') {
         navigate('/expert-dashboard');
       } else {
         navigate('/dashboard');
@@ -73,7 +77,7 @@ const Login: React.FC = () => {
             />
           </div>
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700">Password</label>
+            <label htmlFor="password" className="block text-sm font-medium text-gray-700">Passwords</label>
             <input
               id="password"
               name="password"
@@ -100,7 +104,7 @@ const Login: React.FC = () => {
           </div>
         </form>
         <div className="text-center text-sm text-gray-600">
-          Don't have an account? <a href="#" className="font-medium text-blue-600 hover:text-blue-500">Sign up</a>
+          Don't have an account? <a href="/role-selection" className="font-medium text-blue-600 hover:text-blue-500">Sign up</a>
         </div>
         <div className="flex justify-center my-4">
           <GoogleLogin
@@ -116,7 +120,9 @@ const Login: React.FC = () => {
                     localStorage.setItem('userEmail', user.email || '');
                     localStorage.setItem('userRole', user.role || '');
                     localStorage.setItem('token', token);
-                    if (user.role === 'expert') {
+                    if (isExpertLogin) {
+                      navigate('/expert-dashboard');
+                    } else if (user.role === 'expert') {
                       navigate('/expert-dashboard');
                     } else {
                       navigate('/dashboard');

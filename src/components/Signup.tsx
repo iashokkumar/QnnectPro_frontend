@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import { GoogleLogin } from '@react-oauth/google';
+<<<<<<< HEAD
 import jwt_decode from 'jwt-decode';
 import { useNavigate } from 'react-router-dom';
 
@@ -10,21 +12,44 @@ const Signup: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [role, setRole] = useState('client'); // Default role to client
+=======
+
+const Signup: React.FC = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const isExpertSignup = new URLSearchParams(location.search).get('role') === 'expert';
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+  });
+>>>>>>> master
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    setSuccess(null);
+
+    if (formData.password !== formData.confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
 
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/register', {
-        name,
-        email,
-        password,
-        role, // Include role in the request body
+      const response = await axios.post('http://localhost:5000/api/auth/signup', {
+        ...formData,
+        role: 'user',
       });
+<<<<<<< HEAD
 
       // Handle successful signup
       setSuccess('Signup successful! Please login.');
@@ -49,28 +74,48 @@ const Signup: React.FC = () => {
         // Something happened in setting up the request that triggered an Error
         setError('An error occurred. Please try again.');
         console.error('Error during signup:', err.message);
+=======
+      const { user, token } = response.data;
+      if (user && token) {
+        localStorage.setItem('userName', user.name);
+        localStorage.setItem('userEmail', user.email);
+        localStorage.setItem('userRole', user.role);
+        localStorage.setItem('token', token);
+        if (isExpertSignup) {
+          navigate('/expert-dashboard');
+        } else {
+          navigate('/dashboard');
+        }
+>>>>>>> master
       }
+    } catch (err: any) {
+      if (err.response) {
+        setError(err.response.data.message || 'Signup failed');
+      } else if (err.request) {
+        setError('No response from server. Please try again.');
+      } else {
+        setError('An error occurred. Please try again.');
+      }
+      console.error('Signup error:', err);
     }
   };
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100">
       <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md">
-        <h2 className="text-2xl font-bold text-center text-gray-800">Sign Up</h2>
+        <h2 className="text-2xl font-bold text-center text-gray-800">Sign up as a User</h2>
         {error && <p className="text-red-500 text-center text-sm">{error}</p>}
-        {success && <p className="text-green-500 text-center text-sm">{success}</p>}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700">Name</label>
+            <label htmlFor="name" className="block text-sm font-medium text-gray-700">Full Name</label>
             <input
               id="name"
               name="name"
               type="text"
-              autoComplete="name"
               required
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              value={formData.name}
+              onChange={handleChange}
             />
           </div>
           <div>
@@ -79,11 +124,10 @@ const Signup: React.FC = () => {
               id="email"
               name="email"
               type="email"
-              autoComplete="email"
               required
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              value={formData.email}
+              onChange={handleChange}
             />
           </div>
           <div>
@@ -92,27 +136,23 @@ const Signup: React.FC = () => {
               id="password"
               name="password"
               type="password"
-              autoComplete="new-password"
               required
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              value={formData.password}
+              onChange={handleChange}
             />
           </div>
-          {/* Role Selection */}
           <div>
-            <label htmlFor="role" className="block text-sm font-medium text-gray-700">Role</label>
-            <select
-              id="role"
-              name="role"
+            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">Confirm Password</label>
+            <input
+              id="confirmPassword"
+              name="confirmPassword"
+              type="password"
               required
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900"
-              value={role}
-              onChange={(e) => setRole(e.target.value)}
-            >
-              <option value="client">Client</option>
-              <option value="expert">Expert</option>
-            </select>
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+            />
           </div>
           <div>
             <button
@@ -130,16 +170,19 @@ const Signup: React.FC = () => {
                 try {
                   const response = await axios.post('http://localhost:5000/api/auth/google', {
                     token: credentialResponse.credential,
+                    role: 'user', // Ensure user role
                   });
                   const { user, token } = response.data;
                   if (user && token) {
                     localStorage.setItem('userName', user.name || 'User');
                     localStorage.setItem('userEmail', user.email || '');
-                    localStorage.setItem('userRole', user.role || '');
+                    localStorage.setItem('userRole', user.role || 'user');
                     localStorage.setItem('token', token);
-                    setSuccess('Signup successful!');
-                    // You might want to redirect the user to the dashboard here
-                    // navigate('/dashboard');
+                    if (isExpertSignup) {
+                      navigate('/expert-dashboard');
+                    } else {
+                      navigate('/dashboard');
+                    }
                   }
                 } catch (err) {
                   setError('Google signup failed.');
@@ -150,7 +193,7 @@ const Signup: React.FC = () => {
           />
         </div>
         <div className="text-center text-sm text-gray-600">
-          Already have an account? <a href="#" className="font-medium text-blue-600 hover:text-blue-500">Sign in</a>
+          Already have an account? <a href="/login" className="font-medium text-blue-600 hover:text-blue-500">Sign in</a>
         </div>
       </div>
     </div>
