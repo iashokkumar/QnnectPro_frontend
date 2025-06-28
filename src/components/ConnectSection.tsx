@@ -20,7 +20,7 @@ const ConnectSection: React.FC = () => {
             <h3 className="text-lg font-semibold mb-2 text-black flex items-center">
               Reach Out
               <span className="ml-2 text-purple-500">
-                {React.createElement(FiPhone, { size: 20, color: "#a855f7" })}
+                <FiPhone size={20} color="#a855f7" />
               </span>
             </h3>
             <p className="mb-4 text-black">teamqnnect@gmail.com</p>

@@ -147,7 +147,7 @@ const Dashboard: React.FC = () => {
         <div className="flex items-center justify-between px-12 py-6 border-b border-gray-300 bg-[#e6d6a7]">
           <h1 className="text-6xl font-extrabold text-black">{showProfile ? 'My Profile' : 'Home'}</h1>
           <div className="flex items-center bg-transparent border-4 border-black rounded-full px-6 py-2 w-[400px]">
-            <FiSearch className="text-3xl mr-2 text-black" />
+            <FiSearch className="text-3xl mr-2 text-black" size={24} />
             <input
               type="text"
               placeholder=""

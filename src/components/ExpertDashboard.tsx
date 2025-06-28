@@ -99,7 +99,7 @@ const ExpertDashboard: React.FC = () => {
         <div className="flex items-center justify-between px-10 py-6 border-b border-[#E5E1DC] bg-white">
           <h1 className="text-2xl font-bold text-gray-800">Home</h1>
           <div className="flex items-center bg-gray-100 rounded-full px-4 py-2 border border-gray-300">
-            <FiSearch className="text-gray-500 mr-2" />
+            <FiSearch className="text-gray-500 mr-2 inline-block" size={20} />
             <input type="text" placeholder="Search" className="bg-transparent outline-none text-gray-700" />
           </div>
         </div>

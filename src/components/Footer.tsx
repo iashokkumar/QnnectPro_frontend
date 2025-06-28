@@ -56,7 +56,7 @@ const Footer: React.FC = () => {
               rel="noopener noreferrer"
               className="text-pink-100 hover:text-white text-sm md:text-base flex items-center gap-2"
             >
-              <FaInstagram className="w-5 h-5" />
+              <FaInstagram className="w-5 h-5 inline-block" />
               <span>Instagram</span>
             </a>
           </div>
