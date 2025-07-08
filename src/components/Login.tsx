@@ -1,23 +1,28 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { GoogleLogin } from '@react-oauth/google';
-import jwt_decode from 'jwt-decode';
+import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
+import { setAuthToken, setUser } from '../utils/auth';
 
-const Login: React.FC = () => {
+interface LoginProps {
+  userType: 'client' | 'expert';
+}
+
+const Login: React.FC<LoginProps> = ({ userType }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
-  const location = useLocation();
-  const isExpertLogin = new URLSearchParams(location.search).get('role') === 'expert';
+  const isExpertLogin = userType === 'expert';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
 
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/login', {
+      const response = await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1'}/auth/login`, {
         email,
         password,
       });
@@ -25,10 +30,17 @@ const Login: React.FC = () => {
       // Handle successful login
       const { user, token } = response.data;
       if (user && token) {
-        localStorage.setItem('userName', user.name || 'User');
-        localStorage.setItem('userEmail', user.email || '');
-        localStorage.setItem('userRole', user.role || '');
-        localStorage.setItem('token', token);
+        // Set the auth token
+        setAuthToken(token);
+        
+        // Set user data
+        setUser({
+          id: user._id,
+          name: user.name || 'User',
+          email: user.email || '',
+          role: user.role || '',
+          profileImage: user.profileImage
+        });
       }
       if (isExpertLogin) {
         navigate('/expert-dashboard');
@@ -77,17 +89,30 @@ const Login: React.FC = () => {
             />
           </div>
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700">Passwords</label>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              autoComplete="current-password"
-              required
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
+            <label htmlFor="password" className="block text-sm font-medium text-gray-700">Password</label>
+            <div className="relative mt-1">
+              <input
+                id="password"
+                name="password"
+                type={showPassword ? 'text' : 'password'}
+                autoComplete="current-password"
+                required
+                className="block w-full px-3 py-2 pr-10 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+              <button
+                type="button"
+                className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-700"
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? (
+                  <EyeSlashIcon className="h-5 w-5" aria-hidden="true" />
+                ) : (
+                  <EyeIcon className="h-5 w-5" aria-hidden="true" />
+                )}
+              </button>
+            </div>
           </div>
           <div className="flex items-center justify-between">
             <div className="text-sm">
@@ -111,29 +136,37 @@ const Login: React.FC = () => {
             onSuccess={async (credentialResponse) => {
               if (credentialResponse.credential) {
                 try {
-                  const response = await axios.post('http://localhost:5000/api/auth/google', {
+                  const response = await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1'}/auth/google`, {
                     token: credentialResponse.credential,
+                    role: isExpertLogin ? 'expert' : 'client'
                   });
                   const { user, token } = response.data;
                   if (user && token) {
-                    localStorage.setItem('userName', user.name || 'User');
-                    localStorage.setItem('userEmail', user.email || '');
-                    localStorage.setItem('userRole', user.role || '');
-                    localStorage.setItem('token', token);
-                    if (isExpertLogin) {
-                      navigate('/expert-dashboard');
-                    } else if (user.role === 'expert') {
+                    // Set the auth token
+                    setAuthToken(token);
+                    
+                    // Set user data
+                    setUser({
+                      id: user._id,
+                      name: user.name || 'User',
+                      email: user.email || '',
+                      role: user.role || '',
+                      profileImage: user.profileImage
+                    });
+                    
+                    if (user.role === 'expert') {
                       navigate('/expert-dashboard');
                     } else {
                       navigate('/dashboard');
                     }
                   }
                 } catch (err) {
-                  setError('Google login failed.');
+                  console.error('Google login error:', err);
+                  setError('Google login failed. Please try again.');
                 }
               }
             }}
-            onError={() => setError('Google login failed.')}
+            onError={() => setError('Google login failed. Please try again.')}
           />
         </div>
       </div>
@@ -141,4 +174,4 @@ const Login: React.FC = () => {
   );
 };
 
-export default Login; 
+export default Login;
